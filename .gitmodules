@@ -1,0 +1,4 @@
+[submodule "TCP-IP-Python-V4"]
+	path = TCP-IP-Python-V4
+	url = https://github.com/Dobot-Arm/TCP-IP-Python-V4.git
+	branch = feature/v4-optimization

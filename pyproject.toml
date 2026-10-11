@@ -1,0 +1,19 @@
+[project]
+name = "mycobot-leader"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dobot-sdk",
+    "pymycobot>=4.0.7",
+    "pynput>=1.8.2",
+]
+
+[tool.uv.workspace]
+members = [
+    "TCP-IP-Python-V4",
+]
+
+[tool.uv.sources]
+dobot-sdk = { workspace = true, editable = true }
