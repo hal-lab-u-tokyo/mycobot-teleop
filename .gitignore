@@ -8,3 +8,9 @@ wheels/
 
 # Virtual environments
 .venv
+
+# artifacts (reference documents, reports, etc.)
+artifacts/
+
+# Recorded robot data and generated datasets
+data/

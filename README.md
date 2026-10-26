@@ -133,6 +133,69 @@ Novaの移動範囲に人や物が入らないようにし、物理E-stopをす�
 
 対象関節を変更する場合も、機構の干渉や姿勢を確認してから実行してください。
 
+## データ収集
+
+`record` はタスク説明とRealSenseの名前・シリアル番号を受け取り、1回のテレオペレーションを1エピソードとして保存します。カメラ映像はカメラごとのRealSense `.bag` とフレーム時刻sidecar (`<name>.timestamps.jsonl`)、ロボット状態とNovaへの指令はイベント形式の `telemetry.jsonl`、エピソード情報はJSONで保存します。sidecarにはSDKフレーム番号・時刻・時刻ドメインと、PCの単調時計で測った受信時刻を含みます。既定のカメラ設定はRGB 640×480・30 fpsです。出力先は `data/recordings/` です。
+
+カメラのシリアル番号は次のコマンドで確認できます。
+
+```sh
+sudo rs-enumerate-devices -s
+```
+
+記録モードのdry runではロボットを動かさず、カメラ収録も開始しません。
+
+```sh
+uv run python main.py record \
+  --task "Move the cube into the tray" \
+  --camera front=YOUR_FRONT_SERIAL \
+  --camera wrist=YOUR_WRIST_SERIAL
+```
+
+実際に操作・記録するには `--execute` を付けます。既存のteleopと同じく `ARM` の入力も必要です。
+
+```sh
+uv run python main.py record \
+  --task "Move the cube into the tray" \
+  --camera front=YOUR_FRONT_SERIAL \
+  --camera wrist=YOUR_WRIST_SERIAL \
+  --execute
+```
+
+SPACEで収録・追従を開始し、SPACEまたはESCで停止します。終了時に成功・失敗を入力します。異常終了したエピソードはエラーまたは中断として記録されます。既存の `teleop` コマンドは記録なしで従来どおり使えます。
+
+RealSense SDKのコマンドラインツールだけではPythonからの撮影に使えません。記録に使うPython環境にも `pyrealsense2` バインディングが必要です。この環境の標準Pythonではバインディングが未導入のため、`record --execute` はSDK/カメラの事前確認で停止します。macOSではSDKのUSBアクセスに管理者権限が必要になる場合があります。カメラ認識に失敗した場合は、ロボットを有効化する前にエラー終了します。実機上でのsudo実行は、macOSのキーボード権限と出力ファイルの所有権も確認してから行ってください。
+
+収録後のraw検査と品質レポートはロボット・カメラに接続せず実行できます。
+
+```sh
+uv run python main.py inspect --session data/recordings/SESSION_ID
+uv run python main.py quality --session data/recordings/SESSION_ID \
+  --output data/recordings/SESSION_ID-quality.json
+```
+
+同期済み中間形式は、参照カメラの各フレーム時刻にロボット状態・指令と他カメラの近傍フレームを対応付けます。状態の線形補間は有効サンプル間だけで行い、許容差から外れた候補は理由付きで `excluded.jsonl` に残します。出力ディレクトリは新規作成し、既存rawや出力を上書きしません。`--state-source` は `mycobot` または `nova` を指定してください。
+
+```sh
+uv run python main.py synchronize \
+  --session data/recordings/SESSION_ID \
+  --output data/datasets/session-v1 \
+  --reference-camera front \
+  --state-source nova
+```
+
+`export --format synchronized` は同じ中間形式を書き出します。中間形式はraw bagへのフレーム参照を保持します。`export --format lerobot` は `.bag` からRGBを読み、指定フレームを `observation.images.<camera>`、Novaの状態を `observation.state`、絶対ServoJ目標を `action` としてLeRobot v3へ変換します。状態・actionと参照画像の時刻差も補助featureに保存し、出力後にLeRobot readerで再度開いてfeatureと総フレーム数を確認します。LeRobot timestampは指定したnominal FPSです。元のホスト単調時刻は `source_time_ns` featureに残ります。
+
+LeRobot変換を行うには、同じuv環境に `lerobot[dataset]==0.6.1` と、現在のPython/OSに対応した `pyrealsense2` が必要です。LeRobotのwriterは `create`, `add_frame`, `save_episode`, `finalize` を使います。1回目は短い記録で試し、変換manifestと動画を確認してください。既定では成功/失敗の完了episodeを含め、異常終了episodeと`filter`判断済みepisodeを除外します。`--state-source nova` は実測Nova関節状態を観測にします。Novaの状態記録は現状約4 Hzなので、30 fps時系列で全フレームに近傍状態を付けるには `--state-mode nearest --state-slop-ms 140` のように広い許容幅が必要です。`observation_state_match_delta_ms` を見て、動作に対して状態が遅れていないか確認してください。
+
+キュレーション判断はrawを変更せず、別JSONファイルから追記します。`decisions.json` はエピソードごとの `episode_id`、`decision` (`keep` / `filter` / `relabel`)、`reason`、`method` を持つ配列です。`relabel` では修正ラベルの `labels` も必要です。
+
+```sh
+uv run python main.py curate \
+  --session data/recordings/SESSION_ID \
+  --decisions decisions.json
+```
+
 ## LED表示
 
 mycobotのAtom LEDは、処理状態に応じて色を変えます。

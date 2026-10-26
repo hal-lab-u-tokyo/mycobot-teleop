@@ -8,6 +8,7 @@ dependencies = [
     "dobot-sdk",
     "pymycobot>=4.0.7",
     "pynput>=1.8.2",
+    "pyrealsense2-macosx>=2.56.5",
 ]
 
 [tool.uv.workspace]
