@@ -26,7 +26,7 @@ const $ = <T extends Element = HTMLElement>(id: string): T => {
 const sessionSelect = $<HTMLSelectElement>("session-select");
 const episodeSelect = $<HTMLSelectElement>("episode-select");
 const slider = $<HTMLInputElement>("time-slider");
-const canvas = new TrajectoryPlot($<HTMLCanvasElement>("trajectory-canvas"));
+const canvas = new TrajectoryPlot($("trajectory-canvas"));
 
 let sessionOptions: SessionOption[] = [];
 let data: SessionData | null = null;
@@ -503,6 +503,12 @@ armToggle.addEventListener("click", () => {
   armToggle.setAttribute("aria-pressed", String(visible));
   armToggle.classList.toggle("active", visible);
   canvas.setArmVisible(visible);
+});
+const gripperOpening = $<HTMLInputElement>("gripper-opening");
+gripperOpening.addEventListener("input", () => {
+  const openingMm = Number(gripperOpening.value);
+  $("gripper-opening-value").textContent = `${openingMm} mm`;
+  canvas.setGripperOpeningMm(openingMm);
 });
 $("reset-camera").addEventListener("click", () => {
   canvas.reset();

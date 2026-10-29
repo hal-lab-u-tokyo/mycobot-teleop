@@ -57,12 +57,16 @@
             </header>
             <div class="trajectory-legend"><span><i class="legend-line actual-line"></i>実測</span><span><i class="legend-line command-line"></i>ServoJ指令</span><span><i class="legend-point cursor-point"></i>再生位置</span><span class="joint-range-label">関節範囲: J1 ±360° · J2 ±180° · J3 ±160° · J4–J6 ±360°</span></div>
             <div class="canvas-wrap">
-              <canvas id="trajectory-canvas" aria-label="Nova 5のEEF軌道"></canvas>
+              <div id="trajectory-canvas" aria-label="Nova 5のEEF軌道"></div>
               <div class="canvas-overlay top-left"><span>BASE FRAME</span><span id="cursor-position">X — · Y — · Z — mm</span></div>
               <div class="canvas-scale"><span>0.5 m</span><i></i></div>
               <div id="canvas-empty" class="canvas-empty hidden">関節データがありません</div>
             </div>
-            <div class="trajectory-footer"><span>位置: <strong id="eef-coordinates">X — <b>Y —</b> Z — mm</strong></span><small>Link6原点 · TCPオフセット未適用</small></div>
+            <div class="trajectory-footer">
+              <span>位置: <strong id="eef-coordinates">X — <b>Y —</b> Z — mm</strong></span>
+              <label class="gripper-control" for="gripper-opening"><span>開口</span><input id="gripper-opening" type="range" min="0" max="95" step="1" value="95" aria-label="グリッパー開口幅" /><output id="gripper-opening-value" for="gripper-opening">95 mm</output></label>
+              <small>簡易AG-160-95 · Link6原点 · TCPオフセット未適用</small>
+            </div>
           </article>
 
           <section class="camera-column" aria-label="同期カメラ映像">

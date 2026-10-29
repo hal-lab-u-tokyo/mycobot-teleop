@@ -41,12 +41,15 @@ The common time axis is host monotonic nanoseconds:
 
 The viewer interpolates joint angles at the playback cursor and computes FK locally. It shows J1–J3 and J4–J6 together in separate angle plots. The `.bag` timestamps are retained as metadata but are not mixed with the host clock.
 
-EEF is displayed at the Nova 5 `Link6` origin (flange frame). The FK joint origins, axes, and limits are based on Dobot's [Nova 5 Xacro](https://github.com/Dobot-Arm/TCP-IP-ROS-6AXis/blob/feature/v4-optimization/dobot_gazebo/urdf/nova5_robot.xacro). `npm run model:download` fetches its seven STL meshes into `public/models/nova5/` and saves the upstream MIT license beside them. When those files are present the viewer renders the STL model; otherwise it falls back to a width-aware schematic. The measured controller TCP/tool offset is not recorded in this session, so the display does not claim calibrated TCP coordinates.
+EEF is displayed at the Nova 5 `Link6` origin (flange frame). The FK joint origins, axes, and limits are based on Dobot's [Nova 5 Xacro](https://github.com/Dobot-Arm/TCP-IP-ROS-6AXis/blob/feature/v4-optimization/dobot_gazebo/urdf/nova5_robot.xacro). The 3D pane uses Three.js with OrbitControls and STLLoader. `npm run model:download` fetches the Nova 5 STL meshes into `public/models/nova5/`; when those files are present the viewer renders them, otherwise it falls back to a primitive arm.
+
+The viewer places meshes converted from the STEP assembly's main `A.STEP` shell and `FLANGE.STEP` solid at Link6. The moving fingertips use the actual `FINGER_FINGERTIP` STEP part; the substitute finger and fingertip boxes have been removed. Three.js does not load STEP directly; `uv run --with cadquery python data_viewer/scripts/export_ag160_meshes.py` regenerates all three STL meshes under `public/models/ag160/`. The shell bounds are 93 × 129.5 × 52.3 mm and the flange bounds are 93 × 18.2 × 67 mm. The slider translates the fingertip parts across 0–95 mm, with the tips 190 mm from Link6 per the requested nominal length. The STEP assembly's mounting-plane-to-tip distance measures 188.041 mm. Other finger linkages remain schematic. Since gripper telemetry is not recorded yet, opening is set manually and does not change during episode playback. The measured controller TCP/tool offset is not recorded, so the displayed endpoint remains the Link6 flange origin.
 
 ## Controls
 
 - Drag the 3D canvas to orbit; scroll to zoom.
 - Use `3D`, `上面`, and `側面` to switch the camera view.
+- Move the `開口` slider to set the simplified gripper opening from 0 to 95 mm.
 - Play, pause, step, or scrub the shared time cursor to move both camera frames and the robot trace together.
 - Compare the solid measured lines with dashed ServoJ targets; J1–J3 and J4–J6 are overlaid in separate panes.
 - Angular acceleration is estimated from the joint-angle samples with a five-sample local quadratic fit and shown in °/s².

@@ -10,7 +10,11 @@
     "model:download": "python3 scripts/download_nova5_meshes.py"
   },
   "devDependencies": {
+    "@types/three": "^0.180.0",
     "typescript": "5.9.3",
     "vite": "5.4.21"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
   }
 }

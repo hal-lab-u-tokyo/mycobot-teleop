@@ -52,8 +52,9 @@ h1, h2 { margin: 0; color: var(--ink); font-size: 14px; font-weight: 600; }
 .legend-point { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 50%; vertical-align: middle; }
 .cursor-point { background: var(--ink); }
 .canvas-wrap { position: relative; height: clamp(310px, 36vw, 490px); overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #f0ede5; }
-#trajectory-canvas { display: block; width: 100%; height: 100%; cursor: grab; }
-#trajectory-canvas.dragging { cursor: grabbing; }
+#trajectory-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; cursor: grab; }
+.trajectory-webgl { display: block; width: 100%; height: 100%; }
+#trajectory-canvas:active { cursor: grabbing; }
 .canvas-overlay { position: absolute; pointer-events: none; color: #858176; font: 9px ui-monospace, SFMono-Regular, Menlo, monospace; }
 .canvas-overlay.top-left { top: 12px; left: 13px; display: flex; flex-direction: column; gap: 5px; }
 .canvas-overlay.top-left span:first-child { color: #657d73; letter-spacing: .08em; }
@@ -64,6 +65,9 @@ h1, h2 { margin: 0; color: var(--ink); font-size: 14px; font-weight: 600; }
 .trajectory-footer strong { margin-left: 4px; color: var(--ink); font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; }
 .trajectory-footer strong b { margin: 0 6px; color: var(--muted); font-weight: 400; }
 .trajectory-footer small { color: var(--quiet); font-size: 9px; }
+.gripper-control { display: flex; align-items: center; gap: 8px; color: var(--muted); white-space: nowrap; }
+.gripper-control input { width: clamp(80px, 12vw, 150px); accent-color: var(--actual); }
+.gripper-control output { width: 42px; color: var(--ink); font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; text-align: right; }
 .camera-column { display: grid; grid-template-rows: 1fr 1fr; gap: 12px; min-height: 0; }
 .camera-panel { min-height: 0; }
 .camera-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 13px; }
