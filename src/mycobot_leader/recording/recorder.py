@@ -317,7 +317,12 @@ class SessionRecorder:
             active["accepted_events"] += 1
             return True
 
-    def end_episode(self, status: str, reason: str | None = None) -> dict[str, Any]:
+    def end_episode(
+        self,
+        status: str,
+        reason: str | None = None,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Drain queued events, close the JSONL file, and finalize episode.json."""
         if not isinstance(status, str) or not status.strip():
             raise ValueError("status must be a non-empty string")
@@ -338,6 +343,8 @@ class SessionRecorder:
         barrier.done.wait()
         with self._lock:
             episode = active["metadata"]
+            if metadata:
+                episode.update(dict(metadata))
             if barrier.error:
                 self._set_writer_error(barrier.error)
                 episode_status = "error"

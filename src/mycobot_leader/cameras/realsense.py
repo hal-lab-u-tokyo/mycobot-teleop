@@ -444,6 +444,10 @@ class MultiRealSenseCapture:
                 if runtime.status.state not in {"error", "stopped"}:
                     stop_errors.append("{}: {}".format(runtime.spec.name, exc))
 
+        # Mark the capture boundary once every pipeline has received stop,
+        # before worker joins and timestamp-sidecar fsync add shutdown latency.
+        stopped_at = time.monotonic_ns()
+
         for runtime in runtimes:
             worker = runtime.worker
             if worker is not None and worker.is_alive():
@@ -475,7 +479,6 @@ class MultiRealSenseCapture:
                     stop_errors.append("{}: {}".format(runtime.spec.name, detail))
                 runtime.timestamps_file = None
 
-        stopped_at = time.monotonic_ns()
         with self._lock:
             for runtime in runtimes:
                 runtime.status.stopped_monotonic_ns = stopped_at
